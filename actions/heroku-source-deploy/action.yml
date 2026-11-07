@@ -1,0 +1,45 @@
+name: Heroku source deployment
+description: Upload a prepared source archive and wait for its Heroku build and release.
+inputs:
+  app-name:
+    description: Existing Cedar application configured with a buildpack stack.
+    required: true
+  api-token:
+    description: Heroku API token, supplied from a GitHub secret.
+    required: true
+  archive-path:
+    description: Path to the prepared tar.gz archive, including generated files.
+    required: true
+  source-version:
+    description: Source commit or other version recorded on the build.
+    required: true
+  timeout-seconds:
+    description: Overall upload, build and release timeout, from 1 to 3600 seconds.
+    default: '900'
+outputs:
+  build-id:
+    description: Heroku build identifier.
+    value: ${{ steps.deploy.outputs.build-id }}
+  release-id:
+    description: Heroku release identifier.
+    value: ${{ steps.deploy.outputs.release-id }}
+  release-version:
+    description: Heroku release version number.
+    value: ${{ steps.deploy.outputs.release-version }}
+  checksum:
+    description: SHA256 checksum of the uploaded archive.
+    value: ${{ steps.deploy.outputs.checksum }}
+runs:
+  using: composite
+  steps:
+    - name: Deploy source archive
+      id: deploy
+      shell: bash
+      env:
+        HEROKU_ACTION_PATH: ${{ github.action_path }}
+        HEROKU_DEPLOY_APP: ${{ inputs.app-name }}
+        HEROKU_DEPLOY_TOKEN: ${{ inputs.api-token }}
+        HEROKU_DEPLOY_ARCHIVE: ${{ inputs.archive-path }}
+        HEROKU_DEPLOY_VERSION: ${{ inputs.source-version }}
+        HEROKU_DEPLOY_TIMEOUT: ${{ inputs.timeout-seconds }}
+      run: node "$HEROKU_ACTION_PATH/run.mjs"
