@@ -139,3 +139,15 @@ test('Deploy should sanitise network errors that contain signed URLs or credenti
     return true;
   });
 });
+
+// Heroku's signed source-upload URLs require the request to omit Content-Type.
+test('Deploy should omit content type and authentication headers when uploading to a signed source URL', async (t) => {
+  const f = await fixture(t);
+  await f.run();
+  const upload = f.requests.find((request) => request.method === 'PUT');
+  const headers = new Request(upload.url, upload).headers;
+  assert.equal(headers.has('Content-Type'), false);
+  assert.equal(headers.has('Authorization'), false);
+  assert.equal(headers.has('Accept'), false);
+  assert.deepEqual(upload.body, f.bytes);
+});
