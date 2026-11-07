@@ -88,8 +88,9 @@ export async function deploy(options, dependencies = {}) {
   const source = await json('/sources', 'POST');
   const putUrl = sourceUrl(source.source_blob?.put_url);
   const getUrl = sourceUrl(source.source_blob?.get_url);
+  // Heroku's signed source-upload contract requires no Content-Type header.
   await request(putUrl, {
-    method: 'PUT', headers: { 'Content-Type': 'application/octet-stream' }, body: bytes,
+    method: 'PUT', headers: {}, body: bytes,
   }, 'source upload', 120000);
 
   let build = await json('/builds', 'POST', { source_blob: { url: getUrl, checksum, version } });

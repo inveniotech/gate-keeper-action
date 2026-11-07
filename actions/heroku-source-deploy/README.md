@@ -3,6 +3,8 @@
 Uploads a prepared `.tar.gz` archive through Heroku's Sources API, starts a build with the
 application's configured buildpacks, and waits for the build and release to succeed. Generated
 files in the archive do not need to be tracked by Git. There are no runtime package dependencies.
+Source uploads omit `Content-Type` as required by Heroku's signed-upload contract. The Heroku
+API token is sent only to the platform API, never to a source-upload URL.
 
 The caller supplies Node.js 26 or later, an existing Cedar application on a buildpack stack,
 and a Heroku API token. Container-stack and Fir applications are rejected before upload.
